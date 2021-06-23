@@ -1,0 +1,704 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <link href="https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900&display=swap"
+    rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <title>Hệ thống BoEC </title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/css/style.css' %}" rel="stylesheet">
+  <!--
+
+TemplateMo 546 Sixteen Clothing
+
+https://templatemo.com/tm-546-sixteen-clothing
+
+-->
+
+  <!-- Additional CSS Files -->
+  <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css'%}">
+  <link rel="stylesheet" href="{% static 'assets/css/templatemo-sixteen.css'%}">
+  <link rel="stylesheet" href="{% static 'assets/css/owl.css'%}">
+
+</head>
+
+
+
+<body>
+
+  <!-- ***** Preloader Start ***** -->
+  <div id="preloader">
+    <div class="jumper">
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+  </div>
+  <!-- ***** Preloader End ***** -->
+
+  <!-- Header -->
+  <!-- Banner Ends Here -->
+  {% include 'homepage/header.html' %}
+
+
+
+  {%block contentblock%}
+  {% endblock %}
+  {% include 'homepage/footer.html' %}
+
+
+
+
+  <!-- Bootstrap core JavaScript -->
+
+  <script src="{%static 'vendor/jquery/jquery.min.js'%}"></script>
+  <script src="{%static 'vendor/bootstrap/js/bootstrap.bundle.min.js'%}"></script>
+
+
+  <!-- Additional Scripts -->
+  <script src="{% static 'assets/js/custom.js'%}"></script>
+  <script src="{% static 'assets/js/owl.js'%}"></script>
+  <script src="{% static 'assets/js/slick.js'%}"></script>
+  <script src="{% static 'assets/js/isotope.js'%}"></script>
+  <script src="{% static 'assets/js/accordions.js'%}"></script>
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+
+  <script language="text/Javascript">
+    cleared[0] = cleared[1] = cleared[2] = 0; //set a cleared flag for each field
+    function clearField(t) {                   //declaring the array outside of the
+      if (!cleared[t.id]) {                      // function makes it static and global
+        cleared[t.id] = 1;  // you could use true and false, but that's more typing
+        t.value = '';         // with more chance of typos
+        t.style.color = '#fff';
+      }
+    }
+  </script>
+  <script>
+    $(document).ready(function () {
+      $('.status_order').click(function(){
+        status=  $(this).data('type')
+        form =$('#form_status');
+        if(status=="all"){
+          var url =`/order/status/0`
+        }
+        else{
+          var url =`/order/status/${status}`
+        }
+        form.attr('action',url)
+        form.submit()
+        console.log(form)
+      
+      })
+      var shipping_id
+      var payment_id
+      var subtotal = $('#total').text();
+      var total
+      $('#shipping').change(function () {
+        shipping_id = $('#shipping').val()
+        var fee = $("#shipping option:selected").data('fee')
+        
+        total = Number(subtotal) + Number(fee)
+        
+        // fee =format(fee)
+            const formatter = new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'vnd',
+            minimumFractionDigits: 0
+          })
+          fee= formatter.format(fee)
+          total= formatter.format(total)
+          $('#total').html(total)
+        
+        $('.shipping-fee').html(fee)
+      })
+      var btn_payment = $('button[name="payment_method"]')
+      btn_payment.click(function () {
+        btn_payment.removeClass('btn-outline-danger')
+        $(this).addClass("btn-outline-danger")
+        payment_id = $(this).data('id')
+        if(payment_id==1){
+            $('.info_payment').html(`
+            <div class="col-md-3">
+                <h6>Thanh toán khi nhận hàng</h6>
+            </div>
+            <div class="col-md-9">
+                <h6>Phí thu hộ: ₫0 VNĐ. Ưu đãi về phí vận chuyển (nếu có) áp dụng cả với phí thu hộ.</h6>
+            </div>
+            `)
+        }
+        else if(payment_id==2){
+          $.get("{% url 'user:creditcard'%}",
+          {
+            
+            
+          },
+          function (data, status) {
+            if (status == 'success') {
+              
+              console.log((data['credit']));
+              var credits = data['credit']
+              var html=` <div class="col-md-3">
+                <h6>Chọn thẻ</h6>
+            </div>
+            <div class="col-md-9">`
+              credits.forEach(c=>
+                {
+                    var number = c.credit_card_number.substring(c.credit_card_number.length-4, c.credit_card_number.length);
+                    number = "**** "+number
+                    checked = c.default===true?"checked":''
+                    html+=`
+                    
+                    <div class="form-check mb-2">
+                    <label class="form-check-label">
+                      <input type="radio" class="form-check-input" ${checked} name="selected_creditcard" id="" value="${number}" >
+                      <img class="credit_card_logo"src="https://deo.shopeemobile.com/shopee/shopee-pcmall-live-sg/assets/0f5a6280087a620ff44a2c177c41c582.png" alt="">
+                      <strong>${c.name}</strong>
+                      ${number}
+                  </label>
+                  </div>
+                    
+                    `
+                }
+              )
+              html+=`</div>`
+              $('.info_payment').html(html)
+             
+            }
+          },"JSON");
+        }
+        else{
+          $('.info_payment').html(`
+            <div class="col-md-3">
+                <h6>Thanh toán ví điện tử</h6>
+            </div>
+            <div class="col-md-9">
+                <h6>Giảm giá: ₫10000 VNĐ. Ưu đãi về khi thanh toán bằng ví điện tử airpay.</h6>
+            </div>
+            `)
+        }
+      })
+      $('#order').click(function () {
+        shipping_address =$('#shipping_address').text()
+       
+        $.post("/order/addOrder/",
+          {
+            shipping_id: shipping_id,
+            payment_id: payment_id,
+            shipping_address:shipping_address,
+            total: total,
+            'csrfmiddlewaretoken': '{{csrf_token}}',
+          },
+          function (data, status) {
+            if (status == 'success') {
+              
+              setTimeout( async () => {
+                await swal("Đặt hàng thành công!", "Thank you!", "success");
+                window.location = "{% url 'user:purchase'%}"
+              }, 1000);
+            }
+          });
+      })
+
+
+      $('#total').html(total)
+      $('a[name="addCart"]').click(function () {
+        var id = $(this).data('id');
+        // alert(id);
+        var number = $('#product_number').val();
+        if (!number) {
+          number = 1;
+        }
+        $.post("/cart/addCart/",
+          {
+            product_id: id,
+            product_number: number,
+            'csrfmiddlewaretoken': '{{csrf_token}}',
+          },
+          function (data, status) {
+            if (data == 'login') {
+           
+              setTimeout(async() => {
+                await swal("Vui lòng đăng nhập!", "Thank you!", "error");
+                window.location = "{% url 'account:login'%}"
+              }, 1000);
+            }
+            else{
+              // alert("Thêm vào giỏ hàng thành công!");
+              swal("Good job!", "Thêm vào giỏ hàng thành công", "success");
+            }
+          });
+      })
+      //CSS Curency
+      function format(x) {
+        const formatter = new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'vnd',
+            minimumFractionDigits: 0
+          })
+          return formatter.format(x)
+        }
+      let x = document.querySelectorAll(".price-product");
+      console.log(x)
+      for(var i=0;i< x.length;i++){
+          var num=format(Number(x[i].textContent));
+         x[i].innerHTML=num
+      }
+      
+      var quantity = $("input[name='quantity']")
+      console.log(quantity);
+      //delete item
+      var delete_item = $('button[name="delete_item"]')
+      delete_item.click(function (e) {
+        console.log($(this));
+        $.post("/cart/delete/",
+          {
+            cartItem: $(this).data("id"),
+          
+            'csrfmiddlewaretoken': '{{csrf_token}}',
+          },
+          function (data, status) {
+
+             location.reload();
+            
+          });
+      })
+      //delete wishlist
+      var delete_item_wishlist = $('button[name="delete_item_wishlist"]')
+      delete_item_wishlist.click(function (e) {
+        console.log($(this));
+        $.post("",
+          {
+            item_id: $(this).data("id"),
+          
+            'csrfmiddlewaretoken': '{{csrf_token}}',
+          },
+          function (data, status) {
+            swal("Good job!", "Xóa thành công!", "success");
+             location.reload();
+            
+          });
+      })
+      //Update Quantity Cart
+      $(".decrease").click(function () {
+        var input_el = $(this).data('id');
+        var v = $(`#${input_el}`).val() * 1 - 1;
+        if (v >= $(`#${input_el}`).attr('min'))
+          $(`#${input_el}`).val(v)
+        $.post("/cart/update/",
+          {
+            cart_id: input_el,
+            quantity: $(`#${input_el}`).val(),
+            'csrfmiddlewaretoken': '{{csrf_token}}',
+          },
+          function (data, status) {
+            if (status == 'success') {
+
+              location.reload();
+            }
+          });
+      });
+
+
+      $(".increase").click(function () {
+        var input_el = $(this).data('id');
+        var v = $(`#${input_el}`).val() * 1 + 1;
+        $(`#${input_el}`).val(v)
+        if (v <= $(`#${input_el}`).attr('max'))
+          $(`#${input_el}`).val(v)
+        $.post("/cart/update/",
+          {
+            cart_id: input_el,
+            quantity: $(`#${input_el}`).val(),
+            'csrfmiddlewaretoken': '{{csrf_token}}',
+          },
+          function (data, status) {
+            if (status == 'success') {
+              location.reload();
+            }
+          });
+      });
+      quantity.change(function () {
+        alert();
+        $.post("/cart/update/",
+          {
+            cart_id: $(this).attr("id"),
+            quantity: $(this).val(),
+            'csrfmiddlewaretoken': '{{csrf_token}}',
+          },
+          function (data, status) {
+            if (status == 'success') {
+              location.reload();
+            }
+          });
+      })
+      var delete_item = $('a[name="delete_item"]')
+      delete_item.click(function (e) {
+        e.preventDefault();
+        alert($(this).data('id'))
+      })
+      //CreditCard
+      var btn_default_credit = $('button[name="btn-default-credit"]');
+      btn_default_credit.click(function () {
+        creditcard_id = $(this).data('id');
+        $.post("/user/creditcard/",
+          {
+            is_default: 'true',
+            creditcard_id: creditcard_id,
+            'csrfmiddlewaretoken': '{{csrf_token}}',
+          },
+          function (data, status) {
+            if (status == 'success') {
+              swal("Good job!", "Thay đổi thành công!", "success");
+              location.reload();
+            }
+          });
+      })
+      //Address
+      var btn_default_address = $('button[name="btn-default-address"]');
+      btn_default_address.click(function () {
+        address_id = $(this).data('id');
+        $.post("/user/address/",
+          {
+            address_id: address_id,
+            'csrfmiddlewaretoken': '{{csrf_token}}',
+          },
+          function (data, status) {
+            if (status == 'success') {
+              swal("Good job!", "Thay đổi thành công!", "success");
+              location.reload();
+            }
+          });
+      })
+      //Response
+      $('#response').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget) // Button that triggered the modal
+        var recipient = button.data('comment') // Extract info from data-* attributes
+        // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+        // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+        var modal = $(this)
+
+        $('#id_comment').val(recipient)
+        
+        // console.log(modal)
+
+        // modal.find('.modal-body input').val(recipient)
+      })
+      //Modal add address
+      $('#addAddress').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget) // Button that triggered the modal
+        var recipient = button.data('id') // Extract info from data-* attributes
+        // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+        // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+        var modal = $(this)
+
+        $('#add_address').click(function () {
+          var street = $('#street').val();
+          var apartment = $('#apartment').val();
+          var district = $('#district').val();
+          var city = $('#city').val();
+          $.post("/user/address/add",
+            {
+              street: street,
+              apartment: apartment,
+              district: district,
+              city: city,
+              'csrfmiddlewaretoken': '{{csrf_token}}',
+            },
+            function (data, status) {
+              if (status == 'success') {
+                swal("Good job!", "Thêm thành công!", "success");
+                location.reload();
+              }
+            });
+
+        })
+        // alert(street)
+        // console.log(modal)
+
+        // modal.find('.modal-body input').val(recipient)
+      })
+      // Edit Address
+      var btnEditAddress = $('button[name="edit_address"]')
+      $('#editAddress').on('show.bs.modal', function (event) {
+
+        var button = $(event.relatedTarget) // Button that triggered the modal
+        var recipient = button.data('id') // Extract info from data-* attributes
+        // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+        // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+        var street = button.data('street')
+        var apartment = button.data('apartment')
+        var district = button.data('district')
+        var city = button.data('city')
+        var modal = $(this)
+        $('#editstreet').val(street);
+        $('#editapartment').val(apartment);
+        $('#editdistrict').val(district);
+        $('#editcity').val(city);
+
+
+        btnEditAddress.click(function () {
+          var street = $('#editstreet').val();
+          var apartment = $('#editapartment').val();
+          var district = $('#editdistrict').val();
+          var city = $('#editcity').val();
+          alert(street)
+          $.post("/user/address/edit/",
+            {
+              id: recipient,
+              street: street,
+              apartment: apartment,
+              district: district,
+              city: city,
+              'csrfmiddlewaretoken': '{{csrf_token}}',
+            },
+            function (data, status) {
+              if (status == 'success') {
+                location.reload();
+
+              }
+            });
+
+
+        })
+
+      })
+      //change address
+      $('#selected_address').hide();
+      $('#btn_change_address').click(function () {
+      
+        $('#selected_address').show();
+        $('#confirm_address').click(function () {
+          var address=$('input[name="selected_address"]:checked').val();
+          
+          $('#selected_address').hide();
+
+          $('#shipping_address').html(address)
+        })
+      })
+     
+      $('#comment_product').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget) // Button that triggered the modal
+        var id_product = button.data('id') // Extract info from data-* attributes
+        var modal = $(this)
+        var img= button.data('img');
+        var title= button.data('title');
+        var id_order= button.data('order')
+        console.log(img);
+      
+        var html=`
+                <span class="ml-1"style="    background-color: antiquewhite;
+    color: #5f5f3f;"><i class="fas fa-donate fa-2x" style="color: #c5c50ade"></i>Đánh giá và nhận ngay 200xu</span>
+                <div class="row m-3 p-3 border text-center">
+                <div class="col-md-3">
+                       
+                  <a href="/product/detail/${id_product}/"><img class="product-img-small" src="${img}" alt=""></a>
+                </div>
+                  <div class="col-md-9 mb-3">
+                    <a href="/product/detail/${id_product}/"><span class="product_title">${title}</span></a>
+                  </div>
+                </div>
+                  <div class="row">
+                    <div class="col-md-12">
+                      <div class="rating" data-id="">
+                        <span name="star" class="fa fa-star "></span>
+                        <span name="star" class="fa fa-star "></span>
+                        <span name="star" class="fa fa-star "></span>
+                        <span name="star" class="fa fa-star"></span>
+                        <span name="star" class="fa fa-star"></span>
+                      </div>
+                      <div class="form-group">
+                        <label for="">Comment</label>
+                        <textarea class="form-control comment"  id="" rows="3"></textarea>
+                      </div>
+                      <button type="submit" id="comment" class="btn btn-danger">Đánh giá</button>
+                    </div>
+                  </div>
+                 
+                </div>
+
+
+              `
+            $('.product_rating').html(html)
+            var rating = $(`span[name="star"]`)
+            console.log(rating);
+            rating.click(function () {
+            
+              l = rating.index(this)
+              console.log($(this));
+              if ($(this).hasClass('checked')) {
+                for (let index = l + 2; index <= 5; index++) {
+                  console.log(index, $(`span[name="star"]:nth-child(${index})`))
+                  $(`span[name="star"]:nth-child(${index})`).removeClass('checked')
+
+                }
+              }
+                else {
+                  for (let index = 1; index < l + 1; index++) {
+                  console.log(index, $(`span[name="star"]:nth-child(${index})`))
+
+                  $(`span[name="star"]:nth-child(${index})`).addClass('checked')
+
+
+                  }
+                  $(this).addClass('checked')
+                }
+                
+            })
+          
+            $('#comment').click(function(){
+              var score= $(`span[name="star"].checked`).length
+              var comment =$('.comment').val(); 
+              console.log(comment);
+              $.post("{% url 'user:comment' %}",
+              {
+                id_pro: id_product,
+                id_order: id_order,
+                score: score,
+                comment: comment,
+
+                'csrfmiddlewaretoken': '{{csrf_token}}',
+              },
+              function (data, status) {
+                if (status == 'success') {
+                swal("Good job!", "Đánh giá thành công!", "success");
+                 location.reload()
+                
+                }
+              });
+            })
+        
+              
+             
+           
+       
+      })
+      $('#viewcomment').on('show.bs.modal', function (event) {
+
+        var button = $(event.relatedTarget) // Button that triggered the modal
+        var recipient = button.data('id') // Extract info from data-* attributes
+        var modal = $(this)
+        $.post("{% url 'order:getOrder'%}",
+          {
+            id: recipient,
+
+            'csrfmiddlewaretoken': '{{csrf_token}}',
+          },
+          function (data, status) {
+            if (status == 'success') {
+              console.log(data);
+              var orders= data['o'];
+              var comments= data['c'];
+          
+              orders.forEach(o => {
+                comments.forEach(e => {
+                     if(e.product_id === o.product_id){
+                        e.product_name= o.product_name
+                        e.image =o.image
+                     }
+                    });
+              });
+              console.log(comments);
+              var html = ""
+              comments.forEach(d => {
+                var score =d.rating
+                var rating=""
+                for(var i=1;i<=5;i++){
+                  if(i<=score){
+                      rating+=` <span name="star" class="fa fa-star checked"></span>`
+                  }
+                  else{
+                    rating +=` <span name="star" class="fa fa-star "></span>`
+                  }
+                }
+                console.log(rating);
+                html += ` <form action="" method="post" class="border m-2 p-2">
+                          <div class="row  text-center">
+                                <div class="col-md-12 ">
+                                    <img class="product-img-small" src="${d.image}" alt="">
+                                    <span class="product_title-checkout">${d.product_name}</span>
+                                </div>
+                                </div>
+                                <div class="row">
+                                  <div class="col-md-12">
+                                  <div class="rating" data-id="">
+                                 ${rating}
+                              </div>
+                              <div class="form-group">
+                               
+                                <textarea class="form-control" name="" id="" rows="3" disabled>${d.comment}</textarea>
+                              </div>
+                                  </div>
+                                  </div>
+                               
+                               
+                            
+                              </div> 
+                            
+                                          
+                                        </form>`
+
+              });
+             
+            
+            
+            
+              $('.content_rating').html(html)
+            
+              
+             
+             
+
+              //   alert($('span[name="star"].checked').length)
+              // })
+            }
+          }, "JSON");
+        modal.find('.modal-title').text('Đánh giá order ' + recipient)
+
+      });
+      //WishList
+      $('.wishlist').click(function() {
+     
+        $(this).toggleClass('wishlisted')
+        id_pro = $(this).data('id')
+     
+              $.post("{% url 'user:wishlist' %}",
+              {
+                id_pro: id_pro,
+                'csrfmiddlewaretoken': '{{csrf_token}}',
+              },
+              function (data, status) {
+                if (data == 'delete_success') {
+                  
+                 
+                 location.reload()
+                
+                }
+                else if(data == 'true'){
+                  swal("Good job!", "Thêm thành công!", "success");
+                }
+              });
+      })
+    })
+
+  </script>
+
+</body>
+
+</html>
+
+</body>
+
+</html>

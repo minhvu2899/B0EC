@@ -1,0 +1,112 @@
+{% extends 'homepage/base.html' %}
+{% load static %}
+
+{% block contentblock %}
+  <!--Main layout-->
+  <main style="padding-top:100px;">
+      <div class="card-body container">
+         <div class="row">
+             <div class="col-md-12 d-flex justify-content-between border-bottom mb-3">
+                <h2 class="pb-2 ">Thẻ tín dụng</h2>
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addCreditCard" data-id="1">
+                  Thêm thẻ mới
+                  </button>
+             </div>
+         </div>
+          {% for cred in credits %}
+          <div class="row border-bottom  pl-4 d-flex align-items-center">
+            
+            <div class="col-md-4 ">
+              <img class="credit_card_logo"src="https://deo.shopeemobile.com/shopee/shopee-pcmall-live-sg/assets/0f5a6280087a620ff44a2c177c41c582.png" alt="">
+              <span>Master Card </span>{% if cred.default %} <span class="default_address">Mặc định
+
+              </span>{%endif%}
+            </div>
+            <div class="col-md-5 address_user">
+                <h6 class="my-4 name">{{cred.credit_card_number}}
+                  
+                </h6>
+              
+            </div>
+            <div class="col-md-3 d-flex align-items-center">
+                {% if add.default %}  <button class="btn" name="btn-default-address" data-id="{{cred.id}}"  disabled>Thiết lập mặc định</button>{%else%}
+               <button class="btn" name="btn-default-credit" data-id="{{cred.id}}"  >Thiết lập mặc định</button>
+               {%endif%}
+               
+              
+              <form action="{% url 'user:delete_credit'%}" method="post">
+                <input type="hidden" name="id" value="{{cred.id}}">
+                <button onClick="confirm('Bạn có chắc chắn muốn xóa?')"  class="btn btn-danger " type="submit">Xóa</button>
+                {%csrf_token%}
+              </form>
+            
+            </div>
+          </div>
+          {% endfor %}
+          <!-- Thêm địa chỉ -->
+          <div class="modal fade" id="addCreditCard" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLongTitle">Thêm thẻ tín dụng</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        
+                    <form action="" method="POST">
+                    <div class="form-group">
+                      <label for="">Họ tên trên thẻ</label>
+                      <input type="text" name="name" id="" class="form-control" placeholder="Họ tên trên thẻ" >
+                      
+                    </div>
+                    <div class="form-group">
+                      <label for="">Số thẻ</label>
+                       <div class="d-flex ">
+                        <span>   <i class="fab fa-cc-visa" style="font-size: 40px;"></i></span>
+                        <input type="text" name="credit_number" id="" class="form-control" placeholder="1234 5678 9123 4567" maxlength=16>
+                       </div>
+                      
+                    </div>
+                    <div class="form-group">
+                      <label for="">Ngày hết hạn</label>
+                      <div class="d-flex ">
+                       
+                        <span>   <i class="far fa-credit-card" style="font-size: 40px;"></i></span>
+                        <input type="text" name="expriration_date" id="" class="form-control" placeholder="mm/yy" >
+                      </div>
+                      
+                    </div>
+                    <div class="form-group">
+                      <label for="">Mã CVV</label>
+                      <div class="d-flex ">
+                        
+                        <i class="fas fa-credit-card" style="font-size: 40px;"></i>
+                        <input type="text" name="cvv" id="" class="form-control" placeholder="123" >
+                      </div>
+                      
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="add_address">Thêm</button>
+                    {% csrf_token%}
+                </form>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                
+                </div>
+           
+              </div>
+            </div>
+          </div>
+
+          <!-- Sửa địa chỉ -->
+       
+      
+      </div>
+      
+  </main>
+{%endblock%}
+
+  
+

@@ -1,0 +1,51 @@
+{% extends 'homepage/base.html' %}
+{% load static %}
+{% load mathfilters %}
+
+{% block contentblock %}
+  <!--Main layout-->
+  <main style="padding-top:100px;">
+      <div class="cart container">
+          <h2 class="text-danger my-2">Danh sách yêu thích</h2>
+          <div class="row mt-5 pl-4">
+              <div class="col-md-12">
+                  <div class="content  border p-5">
+                      {% for item in wishlist %}
+                      <div class="row my-2 border-bottom">
+                          <div class="col-md-2">
+                              <a href="{% url 'product:detail' item.product.id %}"> <img src="{{item.product.thumbnail}}" class="product-img-md" alt=""></a>
+                             
+                          </div>
+                          <div class="col-md-4">
+                            <a href="{% url 'product:detail' item.product.id %}"> <h5>{{item.product.title}}</h5></a>
+                              <div class="m-4">
+                                <button  name="delete_item_wishlist" data-id="{{item.id}}">Xóa khỏi danh sách</button>
+                                
+                            </div>
+                          </div>
+                          <div class="col-md-3">
+                            <span>Price:</span><strong class="price-product">{{item.product.sale_price}}</strong>
+                           
+                            
+                            </div>
+                            <div class="col-md-3">
+                                <a name="addCart" class="btn btn-danger w-100" data-id="{{item.product.id}}">Add to Cart</a>
+                            </div>
+                      </div>
+                      {% endfor %}
+                
+                   
+                  </div>
+              </div>
+           
+            </div>
+
+      </div>
+      <!--Section: Products v.3-->
+      <!--Pagination-->
+      
+  </main>
+{%endblock%}
+
+  
+

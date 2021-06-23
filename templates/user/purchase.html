@@ -1,0 +1,172 @@
+{% extends 'homepage/base.html' %}
+{% load static %}
+
+
+{% block contentblock %}
+<!--Main layout-->
+<main style="padding-top:100px;">
+  <div class="cart container-fluid">
+    <h2 class="text-center text-dark">Đơn hàng đã mua </h2>
+    <div class="row mt-5 pl-4">
+      <div class="col-md-3 border bg-light">
+        <div class="total m-3">
+          <div class="row py-4 border">
+            <div class="col-md-12 d-flex justify-content-between">
+              <strong>{{request.user}}</strong>
+              <!-- <span>{{total}}</span> -->
+            </div>
+          </div>
+          <div class="row py-4 ">
+            <div class="col-md-12 ">
+              <h4>
+                <a href="{% url 'user:profile'%}" type="submit" class="btn">Tài khoản của tôi</a>
+              </h4>
+              <h4>
+                <a href="{% url 'user:address'%}" type="submit" class="btn">Địa chỉ</a>
+              </h4>
+              <h4 class="">
+                <a href="{% url 'user:purchase'%}" type="submit" class="btn">Đơn mua</a>
+              </h4>
+              <h4 class="">
+                <a href="{% url 'user:rewardpoints'%}" type="submit" class="btn">Điểm thưởng</a>
+              </h4>  
+              <h4 class="">
+                <a href="{% url 'user:creditcard'%}" type="submit" class="btn">Thẻ tín dụng</a>
+              </h4>  
+             
+             
+             
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-9 ">
+        <div class="content   p-2">
+          {% for ord in order %}
+          <div class="row py-2 bg-light">
+            <div class="col-md-8 ">
+              <strong class="bg-outline-info mb-2" disabled >{{ord.user.first_name}} {{ord.user.last_name}} - {{ord.shipping_address}} - {{ord.user.phone_number}}</strong>
+              <span class="text-danger d-inline-block border-primary rounded p-1">{{ord.paymentMethod.title}}</span>
+             
+            </div>
+            <div class="col-md-4 text-right">
+              <strong>Trạng thái:</strong>
+              {% if ord.status == 1 %}
+              <span class="badge badge-pill badge-danger">Chờ xác nhận</span>
+              {%elif ord.status == 2 %}
+              <span class="badge badge-pill badge-warning">Đang xử lí</span>
+              {%elif ord.status == 3 %}
+              <span class="badge badge-pill badge-info">Đang giao hàng</span>
+              {%elif ord.status == 4 %}
+              <span class="badge badge-pill badge-success">Đã hoàn thành</span>
+              {%elif ord.status == 5 %}
+              <span class="badge badge-pill badge-primary">Đã hủy</span>
+              {% endif %}
+            </div>
+          </div>
+          <div class="row bg-light mb-5 border d-flex align-items-center">
+            {%for item in ord.orderdetail_set.all %}
+            <div class="col-md-6">
+             
+              <a href="{% url 'product:detail' item.product.id %}">
+                <img src="{{item.product.thumbnail}}" class="product-img-md" alt="" style="width:80px; height:80px;">
+                <span class="product_title-checkout" style="width: 250px;">{{item.product.title}}</span>
+              </a> 
+            </div>
+            <div class="col-md-1">
+              <strong>x {{item.quantity}}</strong>
+            </div>
+            <div class="col-md-3 text-center">
+              <strong class="price-product text-danger">{{item.price}}</strong>
+
+            </div>
+            {% if not item.is_rating %}
+              <div class="col-md-2"><button type="button" class="btn btn-primary " data-toggle="modal"
+                  data-target="#comment_product" data-order="{{ord.id}}"data-id="{{item.product.id}}" data-img="{{item.product.thumbnail}}"
+                  data-title="{{item.product.title}}">
+                  Đánh giá
+                </button></div>
+              {%else%}
+              <div class="col-md-2"><button disabled type="button" class="btn btn-outline-danger  "
+                >
+                Đã đánh giá
+              </button></div>
+              {%endif%}
+            {%endfor%}
+            <div class="col-md-9 text-right">
+              <h4> Tổng tiền</h4>
+            </div>
+            <div class="col-md-3 text-center">
+              <h4 class=""> <span class="price-product text-danger">{{ord.total}}</span></h4>
+            </div>
+            <div class="col-md-12 d-flex justify-content-end pr-5 py-3 mr-5">
+              {% if not ord.is_rating %}
+              <span class="ml-1"style="    background-color: antiquewhite;
+              color: #5f5f3f;"><i class="fas fa-donate fa-2x" style="color: #c5c50ade"></i>Đánh giá và nhận ngay 200xu</span>
+              {%endif%}
+              <div class="col-md-2"><button type="button" class="btn btn-danger " data-toggle="modal"
+                  data-target="#viewcomment" data-id="{{ord.id}}">
+                  Xem đánh giá
+                </button></div>
+              
+            </div>
+          </div>
+          {% endfor %}
+
+
+        </div>
+      </div>
+
+    </div>
+    <div class="modal fade" id="viewcomment" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+      aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLongTitle">Đánh giá</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="content_rating">
+
+            </div>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+           
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="comment_product" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+      aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLongTitle">Đánh giá sản phẩm</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="product_rating">
+              
+            </div>
+
+         
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+           
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--Section: Products v.3-->
+  <!--Pagination-->
+
+</main>
+{%endblock%}
